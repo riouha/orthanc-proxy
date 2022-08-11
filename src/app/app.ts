@@ -1,7 +1,8 @@
 import { Server } from "http";
 import express, { Request, Response, NextFunction } from "express";
 import cors from "cors";
-import { configs } from "../config/config";
+import { applicationConfigs } from "../config/config";
+import { dbConnection } from "./db/db";
 import { errorHandlerMiddleware } from "../middlewares/error-handler.middleware";
 import { applicatonRouter } from "./app.router";
 import "./app.controller";
@@ -11,7 +12,10 @@ export default class Application {
   public server: Server;
   public app: express.Express;
   constructor() {
-    this.configServer();
+    dbConnection
+      .initialize()
+      .then(() => this.configServer())
+      .catch((err) => console.error(err.message, err));
   }
   //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   configServer() {
@@ -35,7 +39,7 @@ export default class Application {
     this.app.use(errorHandlerMiddleware(console));
 
     // # application setup
-    const port = configs.app.port || 4000;
+    const port = applicationConfigs.app.port || 4000;
     this.server = this.app.listen(port, () => console.log(`listening to port ${port} .............................`));
   }
 }
