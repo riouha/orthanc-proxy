@@ -89,12 +89,11 @@ class PassportService {
           //   "1054853936890-s6fg36qji71ptgks04s5eb14baobs8aa.apps.googleusercontent.com",
           // clientSecret: "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",
           // callbackURL: "https://testapi.maskan13.ir/auth/callback",
-          clientID:
-            "167791499193-ui61fqo0j6qng2vdfvhina854uv5ffak.apps.googleusercontent.com",
-          clientSecret: "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",
+          clientID: process.env.GOOGLE_CLIENTID,
+          clientSecret: process.env.GOOGLE_SECRET,
           callbackURL: "http://localhost:4000/user/auth/google-callback",
         },
-        (accessToken:any, refreshToken:any, profile:any, cb:any) => {
+        (accessToken: any, refreshToken: any, profile: any, cb: any) => {
           console.log("in middlware", accessToken, refreshToken, profile, cb);
         }
       )
@@ -105,8 +104,7 @@ class PassportService {
     passport.authenticate("jwt", { session: false }, (err, user) => {
       // use jwt middleware
       if (err) return next(err);
-      if (!user)
-        throw new UnAuthorizedError("invalid token, please login or signup");
+      if (!user) throw new UnAuthorizedError("invalid token, please login or signup");
       req.user = user;
       return next();
     })(req, res, next);
