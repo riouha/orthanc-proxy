@@ -1,23 +1,33 @@
-import { Entity, Column, PrimaryGeneratedColumn, CreateDateColumn, UpdateDateColumn, BeforeInsert } from "typeorm";
+import {
+  Entity,
+  Column,
+  PrimaryGeneratedColumn,
+  CreateDateColumn,
+  UpdateDateColumn,
+  BeforeInsert,
+} from "typeorm";
 import { Password } from "../services/password.service";
 //=============================================
-
+export type UserRole = "Admin" | "User";
 @Entity()
 export class User {
   @PrimaryGeneratedColumn()
   public id: number;
 
   @Column({ unique: true })
-  public username: string;
-
-  @Column({ unique: true })
   public email: string;
 
-  @Column()
+  @Column({ nullable: true })
   public password: string;
 
+  @Column({ default: "User", enum: ["User", "Admin"] })
+  role: UserRole;
+
   @Column({ nullable: true })
-  public fullname?: string;
+  public firstName?: string;
+
+  @Column({ nullable: true })
+  public lastName?: string;
 
   @Column({ nullable: true })
   public phone?: string;
@@ -25,7 +35,10 @@ export class User {
   @Column({ nullable: true })
   public image?: string;
 
-  @Column({ default: true })
+  @Column({ nullable: true })
+  public country?: string;
+
+  @Column({ default: false })
   public isActive: boolean;
 
   @CreateDateColumn({ type: "timestamp" })

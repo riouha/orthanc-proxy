@@ -37,7 +37,14 @@ export default class Application {
         pathRewrite: { "^/test": "" },
         changeOrigin: true,
         onProxyReq: (proxyReq, req, res, opt) => {
-          console.log(`Route ` + req.headers.host + req.originalUrl + " to " + proxyReq.getHeaders().host + req.url);
+          console.log(
+            `Route ` +
+              req.headers.host +
+              req.originalUrl +
+              " to " +
+              proxyReq.getHeaders().host +
+              req.url
+          );
           console.log(req.body, req.params, req.query);
           console.log(req.user);
           if (req.body) fixRequestBody(proxyReq, req);
@@ -76,6 +83,8 @@ export default class Application {
 
     // # application setup
     const port = applicationConfigs.app.port || 4000;
-    this.server = this.app.listen(port, () => console.log(`listening to port ${port} .............................`));
+    this.server = this.app.listen(port, () =>
+      console.log(`listening to port ${port} .............................`)
+    );
   }
 }
