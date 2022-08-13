@@ -30,11 +30,11 @@ export default class Application {
 
     // # application routes
     this.app.use(
-      "/test",
-      passportService.guard,
+      "/orthanc",
+      // passportService.guard,
       createProxyMiddleware({
-        target: "http://localhost:3000",
-        pathRewrite: { "^/test": "" },
+        target: "http://127.0.0.1:8042",
+        pathRewrite: { "^/orthanc": "" },
         changeOrigin: true,
         onProxyReq: (proxyReq, req, res, opt) => {
           console.log(`Route ` + req.headers.host + req.originalUrl + " to " + proxyReq.getHeaders().host + req.url);
