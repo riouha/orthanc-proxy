@@ -94,7 +94,7 @@ class PassportService {
           clientSecret: "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",
           callbackURL: "http://localhost:4000/user/auth/google-callback",
         },
-        (accessToken, refreshToken, profile, cb) => {
+        (accessToken:any, refreshToken:any, profile:any, cb:any) => {
           console.log("in middlware", accessToken, refreshToken, profile, cb);
         }
       )
