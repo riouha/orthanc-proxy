@@ -11,7 +11,7 @@ class DbConnection {
     database: applicationConfigs.database.name,
     logging: applicationConfigs.database.log,
     connectTimeout: 300000,
-    entities: ["src/**/*.entity.ts", "src/entities/*/*.ts"],
+    entities: process.env.NODE_ENV==="prod"?["build/**/*.entity.js"]:["src/**/*.entity.ts"],
     synchronize: true,
   });
 
