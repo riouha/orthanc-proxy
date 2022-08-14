@@ -22,14 +22,14 @@ class PassportService {
         },
         async (req, email, password, cb) => {
           try {
-            const user: User = await userService.signupUser({
+            const result = await userService.signupUser({
               email,
               password,
               firstName: req.body.firstName,
               lastName: req.body.lastName,
               country: req.body.country,
             });
-            return cb(null, user);
+            return cb(null, result);
           } catch (err) {
             return cb(err, null);
           }
@@ -48,14 +48,8 @@ class PassportService {
         },
         async (_req, email, password, cb) => {
           try {
-            const user = await userService.loginUser(email, password);
-            const token = this.generateToken({
-              id: user.id,
-              email: email,
-              role: user.role,
-              isActive: user.isActive,
-            });
-            return cb(null, { user, token });
+            const user: User = await userService.loginUser(email, password);
+            return cb(null, user);
           } catch (err: any) {
             return cb(err.message, false);
           }
@@ -72,7 +66,6 @@ class PassportService {
         },
         async (token: ITokenPayload, done) => {
           try {
-            if (!token.isActive) done(new ForbidenError("access denied"));
             return done(null, token);
           } catch (error) {
             done(error);
@@ -94,22 +87,36 @@ class PassportService {
           clientSecret: "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",
           callbackURL: "http://localhost:4000/user/auth/google-callback",
         },
-        (accessToken:any, refreshToken:any, profile:any, cb:any) => {
+        (accessToken: any, refreshToken: any, profile: any, cb: any) => {
           console.log("in middlware", accessToken, refreshToken, profile, cb);
         }
       )
     );
   }
 
-  guard(req: Request, res: Response, next: NextFunction) {
-    passport.authenticate("jwt", { session: false }, (err, user) => {
-      // use jwt middleware
-      if (err) return next(err);
-      if (!user)
-        throw new UnAuthorizedError("invalid token, please login or signup");
-      req.user = user;
-      return next();
-    })(req, res, next);
+  guard(role: UserRole, isActive = true) {
+    return (req: Request, res: Response, next: NextFunction) => {
+      passport.authenticate("jwt", { session: false }, (err, user) => {
+        // use jwt middleware
+        if (err) return next(err);
+        if (!user)
+          throw new UnAuthorizedError("invalid token, please login or signup");
+
+        // verify access
+        if (isActive && !user?.isActive)
+          throw new ForbidenError("access denied.");
+        const obj: { [key: string]: UserRole[] } = {
+          User: ["User"],
+          Admin: ["User", "Admin"],
+        };
+        if (!obj[user?.role].includes(role))
+          throw new ForbidenError("access denied.");
+        //
+
+        req.user = user;
+        return next();
+      })(req, res, next);
+    };
   }
 
   generateToken(data: ITokenPayload) {

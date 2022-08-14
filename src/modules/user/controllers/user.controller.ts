@@ -5,12 +5,18 @@ import { Get, Post } from "../../../lib/decorators/methods.decorator";
 import { userService } from "../services/user.service";
 import { IResponse } from "../../../lib/responses/IResponse";
 import { validateInput } from "../../../lib/decorators/valdation.decorators";
-import { LoginSchema, SignupSchema } from "../validations/user.validation";
+import {
+  ForgetPassword,
+  LoginSchema,
+  SignupSchema,
+  VerifySchema,
+} from "../validations/user.validation";
 import { BadRequestError } from "../../../lib/errors/BadRequest";
 import { User } from "../entities/user.entity";
 import { passportService } from "../services/passport.middleware";
 import { UnAuthorizedError } from "../../../lib/errors/UnAuthorized";
 import { Use } from "../../../lib/decorators/middlewae.decorator";
+import { ChangePassword } from "../validations/user.validation";
 
 @Controller("/user")
 class UserController {
@@ -49,21 +55,59 @@ class UserController {
     )(req, res, next);
   }
 
-  @Post("/signup")
+  @validateInput(VerifySchema, "PARAMS")
+  @Get("/:email/verify/:hash")
+  async verifyUser(req: Request, res: Response, next: NextFunction) {
+    try {
+      const user = await userService.varifyUser(
+        req.params.email,
+        req.params.hash
+      );
+      delete user.password;
+      return res.json(<IResponse>{ hasError: false, data: { user } });
+    } catch (err) {
+      next(err);
+    }
+  }
+  @validateInput(ForgetPassword)
+  @Post("/forget-password")
+  async forgetPassword(req: Request, res: Response, next: NextFunction) {
+    try {
+      const hash = await userService.forgetPassword(req.body.email);
+      return res.json(<IResponse>{ hasError: false, data: { hash } });
+    } catch (err) {
+      next(err);
+    }
+  }
+  @validateInput(ChangePassword)
+  @Post("/change-password")
+  async changePassword(req: Request, res: Response, next: NextFunction) {
+    try {
+      const user = await userService.changePassword(
+        req.body.email,
+        req.body.hash,
+        req.body.newPassword
+      );
+      delete user.password;
+      return res.json(<IResponse>{ hasError: false, data: { user } });
+    } catch (err) {
+      next(err);
+    }
+  }
+
   @validateInput(SignupSchema)
+  @Post("/signup")
   async signupUser(req: Request, res: Response, next: NextFunction) {
     // first passport signup middleware will called. then cb will invoke
     passport.authenticate(
       "signup",
       { session: false },
-      async (error, user: User) => {
+      async (error, data: { user: User; hash: string }) => {
         try {
           if (error) throw error;
-          if (!user) throw new BadRequestError("invalid credentials");
-          delete user.password;
-          return res
-            .status(201)
-            .json(<IResponse>{ hasError: false, data: user });
+          if (!data) throw new BadRequestError("invalid credentials");
+          delete data.user.password;
+          return res.status(201).json(<IResponse>{ hasError: false, data });
         } catch (error) {
           next(error);
         }
@@ -71,30 +115,32 @@ class UserController {
     )(req, res, next);
   }
 
-  @Post("/login")
   @validateInput(LoginSchema)
+  @Post("/login")
   async loginUser(req: Request, res: Response, next: NextFunction) {
-    passport.authenticate(
-      "login",
-      { session: false },
-      (error, data: { user: User; token: string }) => {
-        try {
-          if (error || !data) throw new UnAuthorizedError(error);
-          delete data.user.password;
-          return res.status(200).json(<IResponse>{ hasError: false, data });
-        } catch (err) {
-          next(err);
-        }
+    passport.authenticate("login", { session: false }, (error, user: User) => {
+      try {
+        if (error || !user) throw new UnAuthorizedError(error);
+        const token = passportService.generateToken({
+          id: user.id,
+          email: user.email,
+          isActive: user.isActive,
+          role: user.role,
+        });
+        delete user.password;
+        return res.json(<IResponse>{ hasError: false, data: { user, token } });
+      } catch (err) {
+        next(err);
       }
-    )(req, res, next);
+    })(req, res, next);
   }
 
-  @Use(passportService.guard)
+  @Use(passportService.guard("Admin"))
   @Get("/")
   async getUsers(req: Request, res: Response, next: NextFunction) {
     try {
       const users = await userService.getUers();
-      return res.json(<IResponse>{ hasError: false, data: users });
+      return res.json(<IResponse>{ hasError: false, data: { users } });
     } catch (error) {
       next(error);
     }
