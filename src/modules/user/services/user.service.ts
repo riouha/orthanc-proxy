@@ -44,8 +44,7 @@ class UserService {
     });
     if (!user) throw new UnAuthorizedError("invalid email or password.");
     const passwordIsCorrect = await Password.compare(password, user.password);
-    if (!passwordIsCorrect)
-      throw new UnAuthorizedError("invalid email or password.");
+    if (!passwordIsCorrect) throw new UnAuthorizedError("invalid email or password.");
     if (!user.isActive) throw new ForbidenError("verify your account.");
 
     return user;
@@ -89,17 +88,11 @@ class UserService {
     return this.userRepo.save(user);
   }
 
-  private generateVerificationHash(
-    id: number,
-    email: string,
-    expireDate = 1000
-  ) {
+  private generateVerificationHash(id: number, email: string, expireDate = 1000) {
     const ttl = expireDate * 24 * 60 * 60 * 1000; // 7 days
     const expires = Date.now() + ttl;
     const data = `${email}.${id}.${expires}`;
-    const hash = createHmac("sha256", applicationConfigs.jwt.secret)
-      .update(data)
-      .digest("hex"); // creating SHA256 hash of the data
+    const hash = createHmac("sha256", applicationConfigs.jwt.secret).update(data).digest("hex"); // creating SHA256 hash of the data
     return `${hash}.${expires}`; // Hash.expires => send to the user
   }
 
@@ -108,9 +101,7 @@ class UserService {
     if (Date.now() > parseInt(expires)) return false;
 
     const data = `${email}.${id}.${expires}`;
-    const newHash = createHmac("sha256", applicationConfigs.jwt.secret)
-      .update(data)
-      .digest("hex"); // creating SHA256 hash of the data
+    const newHash = createHmac("sha256", applicationConfigs.jwt.secret).update(data).digest("hex"); // creating SHA256 hash of the data
     if (hash === newHash) return true;
     return false;
   }
