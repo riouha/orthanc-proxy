@@ -41,6 +41,11 @@ export class User {
   @Column({ default: false })
   public isActive: boolean;
 
+  @Column({ type: "bigint", default: 5e9 })
+  public totalSpace: number;
+  @Column({ type: "bigint", default: 0 })
+  public usedSpace: number;
+
   @CreateDateColumn({ type: "timestamp" })
   createDate: Date;
   @UpdateDateColumn({ type: "timestamp" })
