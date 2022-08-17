@@ -8,6 +8,11 @@ import { applicatonRouter } from "./app.router";
 import "./app.controller";
 import { createProxyMiddleware, fixRequestBody } from "http-proxy-middleware";
 import { passportService } from "../modules/user/services/passport.middleware";
+import { studyMiddleware } from "../modules/study/services/study.mw";
+import {
+  applyProxyRequestRouter,
+  applyProxyResponseRouter,
+} from "./proxy.routes";
 
 //===============================================================
 
@@ -31,40 +36,52 @@ export default class Application {
     // # application routes
     this.app.use(
       "/orthanc",
-      // passportService.guard,
+      passportService.authenticate,
       createProxyMiddleware({
-        target: "http://127.0.0.1:8042",
+        // selfHandleResponse: true,
+        target: applicationConfigs.orthanc.url,
+        //"http://127.0.0.1:8042"
         pathRewrite: { "^/orthanc": "" },
         changeOrigin: true,
-        onProxyReq: (proxyReq, req, res, opt) => {
-          console.log(
-            `Route ` +
-              req.headers.host +
-              req.originalUrl +
-              " to " +
-              proxyReq.getHeaders().host +
-              req.url
-          );
-          console.log(req.body, req.params, req.query);
-          console.log(req.user);
-          if (req.body) fixRequestBody(proxyReq, req);
+
+        //#region req
+        onProxyReq: async (proxyReq, req, res, opt) => {
+          try {
+            console.info(
+              `route ${req.headers.host + req.originalUrl} ==> ${
+                proxyReq.getHeaders().host + req.url
+              }`
+            );
+            await applyProxyRequestRouter(req, res);
+            if (req.body) fixRequestBody(proxyReq, req);
+          } catch (error: any) {
+            errorHandlerMiddleware(console)(error, req, res, undefined);
+          }
         },
-        onProxyRes: (proxyRes, req, res) => {
-          console.info(
-            `get Response from ` +
-              proxyRes.socket.remoteAddress +
-              ":" +
-              proxyRes.socket.remotePort +
-              req.url +
-              " to " +
-              req.headers.host +
-              req.originalUrl
-          );
-          console.log(proxyRes.statusCode);
-          console.log(res.statusCode);
+        //#endregion
+
+        onProxyRes: async (proxyRes, req, res) => {
+          try {
+            console.info(
+              `get Response from ${proxyRes.socket.remoteAddress}:${
+                proxyRes.socket.remotePort + req.url
+              } ==> ${req.headers.host + req.originalUrl}`
+            );
+            console.log(proxyRes.statusCode);
+            console.log(res.statusCode);
+            await applyProxyResponseRouter(proxyRes, req, res);
+          } catch (error: any) {
+            errorHandlerMiddleware(console)(error, req, res, undefined);
+          }
         },
+        // onProxyRes: responseInterceptor(
+        //   async (responseBuffer, proxyRes, req, res) => {
+        //     return "dddddddddddd";
+        //   }
+        // ),
         onError: (err: any, req: any, res: any) => {
-          console.error(err.message);
+          console.log("$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$");
+          console.error("@@@@@@@@@@@@@@@@@");
         },
       })
     );

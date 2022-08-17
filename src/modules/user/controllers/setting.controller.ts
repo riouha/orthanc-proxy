@@ -1,32 +1,22 @@
 import { Request, Response, NextFunction } from "express";
-import passport from "passport";
 import { Controller } from "../../../lib/decorators/controller.decorator";
-import { Get, Post } from "../../../lib/decorators/methods.decorator";
+import { Put } from "../../../lib/decorators/methods.decorator";
 import { userService } from "../services/user.service";
 import { IResponse } from "../../../lib/responses/IResponse";
 import { validateInput } from "../../../lib/decorators/valdation.decorators";
-import {
-  ForgetPassword,
-  LoginSchema,
-  SignupSchema,
-  VerifySchema,
-} from "../validations/user.validation";
-import { BadRequestError } from "../../../lib/errors/BadRequest";
-import { User } from "../entities/user.entity";
 import { passportService } from "../services/passport.middleware";
-import { UnAuthorizedError } from "../../../lib/errors/UnAuthorized";
+import { SpaceSettingSchema } from "../dto/setting.dto";
 import { Use } from "../../../lib/decorators/middlewae.decorator";
-import { ChangePassword } from "../validations/user.validation";
 
-@Controller("/")
+@Controller("/setting")
 class SettingController {
-  @validateInput(SignupSchema)
+  @validateInput(SpaceSettingSchema)
   @Use(passportService.guard("Admin"))
-  @Get("/")
-  async getUsers(req: Request, res: Response, next: NextFunction) {
+  @Put("/space")
+  async modifyUserSpace(req: Request, res: Response, next: NextFunction) {
     try {
-      const users = await userService.getUers();
-      return res.json(<IResponse>{ hasError: false, data: { users } });
+      const result = await userService.modifyUserSpace(req.body);
+      return res.json(<IResponse>{ hasError: false, data: { result } });
     } catch (error) {
       next(error);
     }

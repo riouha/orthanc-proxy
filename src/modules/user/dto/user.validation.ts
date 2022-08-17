@@ -1,4 +1,5 @@
 import Joi from "joi";
+import { ProfessionalGroupItems } from "../entities/user.entity";
 
 export const SignupSchema = Joi.object({
   email: Joi.string().email().required(),
@@ -6,6 +7,9 @@ export const SignupSchema = Joi.object({
   firstName: Joi.string(),
   lastName: Joi.string(),
   country: Joi.string(),
+  professionalGroups: Joi.array().items(
+    Joi.string().valid(...ProfessionalGroupItems)
+  ),
 });
 
 export const LoginSchema = Joi.object({

@@ -14,7 +14,6 @@ export const applicationConfigs = {
     name: process.env.DATABASE_NAME,
     log: process.env.DATABASE_LOG == "true",
   },
-  jwt: {
-    secret: process.env.JWT_SECRET,
-  },
+  jwt: { secret: process.env.JWT_SECRET },
+  orthanc: { url: process.env.ORTHAC_URL },
 };

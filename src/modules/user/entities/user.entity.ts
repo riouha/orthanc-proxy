@@ -38,6 +38,9 @@ export class User {
   @Column({ nullable: true })
   public country?: string;
 
+  @Column({ type: "simple-array", nullable: true })
+  professionalGroups: ProfessionalGroup[];
+
   @Column({ default: false })
   public isActive: boolean;
 
@@ -58,3 +61,23 @@ export class User {
     this.password = await Password.toHash(this.password);
   }
 }
+
+export type ProfessionalGroup =
+  | "Doctor"
+  | "Medical Company"
+  | "Dentist"
+  | "Veterinarian"
+  | "Law Office"
+  | "Clinical Research"
+  | "Patient"
+  | "Other";
+export const ProfessionalGroupItems = [
+  "Doctor",
+  "Medical Company",
+  "Dentist",
+  "Veterinarian",
+  "Law Office",
+  "Clinical Research",
+  "Patient",
+  "Other",
+];

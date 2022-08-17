@@ -28,6 +28,7 @@ class PassportService {
               firstName: req.body.firstName,
               lastName: req.body.lastName,
               country: req.body.country,
+              professionalGroups: req.body.professionalGroups,
             });
             return cb(null, result);
           } catch (err) {
@@ -116,6 +117,16 @@ class PassportService {
         return next();
       })(req, res, next);
     };
+  }
+  authenticate(req: Request, res: Response, next: NextFunction) {
+    passport.authenticate("jwt", { session: false }, (err, user) => {
+      // use jwt middleware
+      if (err) return next(err);
+      if (!user)
+        throw new UnAuthorizedError("invalid token, please login or signup");
+      req.user = user;
+      return next();
+    })(req, res, next);
   }
 
   generateToken(data: ITokenPayload) {

@@ -8,11 +8,18 @@ import { ForbidenError } from "../../../lib/errors/Forbiden";
 import { randomBytes, createHmac } from "crypto";
 import { applicationConfigs } from "../../../config/config";
 import { NotFoundError } from "../../../lib/errors/NotFound";
+import { SpaceSettingDto } from "../dto/setting.dto";
 
 class UserService {
   userRepo = dbConnection.datasource.getRepository(User);
 
-  async getUers() {
+  async getUser(id: number) {
+    const user = await this.userRepo.findOne({ where: { id } });
+    if (!user) throw new NotFoundError("user not found");
+    return user;
+  }
+
+  async getAllUsers() {
     const users = await this.userRepo.find();
     users.forEach((x) => delete x.password);
     return users;
@@ -30,6 +37,7 @@ class UserService {
     user.firstName = dto.firstName;
     user.lastName = dto.lastName;
     user.country = dto.country;
+    user.professionalGroups = dto.professionalGroups;
     await this.userRepo.save(user, { reload: true });
 
     //@TODO
@@ -44,7 +52,8 @@ class UserService {
     });
     if (!user) throw new UnAuthorizedError("invalid email or password.");
     const passwordIsCorrect = await Password.compare(password, user.password);
-    if (!passwordIsCorrect) throw new UnAuthorizedError("invalid email or password.");
+    if (!passwordIsCorrect)
+      throw new UnAuthorizedError("invalid email or password.");
     if (!user.isActive) throw new ForbidenError("verify your account.");
 
     return user;
@@ -88,11 +97,17 @@ class UserService {
     return this.userRepo.save(user);
   }
 
-  private generateVerificationHash(id: number, email: string, expireDate = 1000) {
+  private generateVerificationHash(
+    id: number,
+    email: string,
+    expireDate = 1000
+  ) {
     const ttl = expireDate * 24 * 60 * 60 * 1000; // 7 days
     const expires = Date.now() + ttl;
     const data = `${email}.${id}.${expires}`;
-    const hash = createHmac("sha256", applicationConfigs.jwt.secret).update(data).digest("hex"); // creating SHA256 hash of the data
+    const hash = createHmac("sha256", applicationConfigs.jwt.secret)
+      .update(data)
+      .digest("hex"); // creating SHA256 hash of the data
     return `${hash}.${expires}`; // Hash.expires => send to the user
   }
 
@@ -101,9 +116,21 @@ class UserService {
     if (Date.now() > parseInt(expires)) return false;
 
     const data = `${email}.${id}.${expires}`;
-    const newHash = createHmac("sha256", applicationConfigs.jwt.secret).update(data).digest("hex"); // creating SHA256 hash of the data
+    const newHash = createHmac("sha256", applicationConfigs.jwt.secret)
+      .update(data)
+      .digest("hex"); // creating SHA256 hash of the data
     if (hash === newHash) return true;
     return false;
+  }
+
+  public modifyUserSpace(dto: SpaceSettingDto) {
+    const query = dbConnection.datasource
+      .createQueryBuilder()
+      .update(User)
+      .set({ totalSpace: dto.space });
+    if (dto.userIds?.length)
+      query.where("id IN (:...userIds)", { userIds: dto.userIds });
+    return query.execute();
   }
 }
 
