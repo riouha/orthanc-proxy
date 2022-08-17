@@ -14,10 +14,10 @@ class UploadService {
   ) => {
     //-----------------------------------------------------------
     const storage = multer.diskStorage({
-      destination: function (req: Request, file, cb) {
+      destination: function (req, file, cb) {
         cb(null, savingDir);
       },
-      filename: function (req: Request, file, cb) {
+      filename: function (req, file, cb) {
         cb(
           null,
           filename ||
@@ -63,7 +63,7 @@ class UploadService {
   }
 
   static filterFn(filters: IFileFilter) {
-    return (req: Request, file: any, cb: any) => {
+    return (req, file, cb) => {
       let isValid = filters === null;
       if (filters && filters.mimetypes) {
         filters.mimetypes.forEach((ft) => {

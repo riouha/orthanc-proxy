@@ -23,7 +23,11 @@ const replaceObjectJoiError = (reqObj: any, errors: any) => {
 
 // request body validator for controllers in class (method decorator)
 export const validationDecorator = (schema: Joi.ObjectSchema) => {
-  return function (target: Object, key: string, descriptor: PropertyDescriptor) {
+  return function (
+    target: Object,
+    key: string,
+    descriptor: PropertyDescriptor
+  ) {
     // target: prototype of class (field properties value is not defined in prototype and get value in construct pahse!)
     // descriptor of target[key] -> for methods: {value,writable,enumerable,configurable}
     const originalMethod = descriptor.value;
@@ -37,7 +41,10 @@ export const validationDecorator = (schema: Joi.ObjectSchema) => {
 
       const validationResult = schema.validate(body, { abortEarly: false });
       if (validationResult.error) {
-        const resultValue = replaceObjectJoiError(validationResult.value, validationResult.error.details);
+        const resultValue = replaceObjectJoiError(
+          validationResult.value,
+          validationResult.error.details
+        );
         throw new BadRequestError("input validation error", resultValue);
       }
       return originalMethod.apply(this, args);
@@ -53,7 +60,10 @@ export const validationDecorator = (schema: Joi.ObjectSchema) => {
 // parameter decorator -> target,key,index,descriptor
 // class decorator -> target:constructor of class,descriptor
 
-export function validationMiddleware(schema: Joi.ObjectSchema, targetField: ValidateInputTargetField) {
+export function validationMiddleware(
+  schema: Joi.ObjectSchema,
+  targetField: ValidateInputTargetField
+) {
   return function (req: Request, res: Response, next: NextFunction) {
     let target;
     switch (targetField) {
@@ -77,21 +87,37 @@ export function validationMiddleware(schema: Joi.ObjectSchema, targetField: Vali
     const validationResult = schema.validate(target, { abortEarly: false });
     if (validationResult.error) {
       // access to request body => (validationResult.value);
-      const resultValue = replaceObjectJoiError({}, validationResult.error.details);
+      const resultValue = replaceObjectJoiError(
+        {},
+        validationResult.error.details
+      );
       throw new BadRequestError("input validation error", resultValue);
     }
     next();
   };
 }
 
-export type ValidateInputTargetField = "BODY" | "PARAMS" | "QUERY" | "URL" | "ALL3";
+export type ValidateInputTargetField =
+  | "BODY"
+  | "PARAMS"
+  | "QUERY"
+  | "URL"
+  | "ALL3";
 export interface IValidateInputMata {
   schema: Joi.ObjectSchema;
   field: ValidateInputTargetField;
 }
 
-export function validateInput(schema: Joi.ObjectSchema, field: ValidateInputTargetField = "BODY") {
+export function ValidateInput(
+  schema: Joi.ObjectSchema,
+  field: ValidateInputTargetField = "BODY"
+) {
   return function (target: any, key: string, descriptor: PropertyDescriptor) {
-    Reflect.defineMetadata(MetadataKey.Validator, { schema, field }, target, key);
+    Reflect.defineMetadata(
+      MetadataKey.Validator,
+      { schema, field },
+      target,
+      key
+    );
   };
 }

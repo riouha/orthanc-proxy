@@ -4,7 +4,7 @@ import { Controller } from "../../../lib/decorators/controller.decorator";
 import { Get, Post } from "../../../lib/decorators/methods.decorator";
 import { userService } from "../services/user.service";
 import { IResponse } from "../../../lib/responses/IResponse";
-import { validateInput } from "../../../lib/decorators/valdation.decorators";
+import { ValidateInput } from "../../../lib/decorators/valdation.decorators";
 import {
   ForgetPassword,
   LoginSchema,
@@ -55,7 +55,7 @@ class UserController {
     )(req, res, next);
   }
 
-  @validateInput(VerifySchema, "PARAMS")
+  @ValidateInput(VerifySchema, "PARAMS")
   @Get("/:email/verify/:hash")
   async verifyUser(req: Request, res: Response, next: NextFunction) {
     try {
@@ -69,7 +69,7 @@ class UserController {
       next(err);
     }
   }
-  @validateInput(ForgetPassword)
+  @ValidateInput(ForgetPassword)
   @Post("/forget-password")
   async forgetPassword(req: Request, res: Response, next: NextFunction) {
     try {
@@ -79,7 +79,7 @@ class UserController {
       next(err);
     }
   }
-  @validateInput(ChangePassword)
+  @ValidateInput(ChangePassword)
   @Post("/change-password")
   async changePassword(req: Request, res: Response, next: NextFunction) {
     try {
@@ -95,7 +95,7 @@ class UserController {
     }
   }
 
-  @validateInput(SignupSchema)
+  @ValidateInput(SignupSchema)
   @Post("/signup")
   async signupUser(req: Request, res: Response, next: NextFunction) {
     // first passport signup middleware will called. then cb will invoke
@@ -115,7 +115,7 @@ class UserController {
     )(req, res, next);
   }
 
-  @validateInput(LoginSchema)
+  @ValidateInput(LoginSchema)
   @Post("/login")
   async loginUser(req: Request, res: Response, next: NextFunction) {
     passport.authenticate("login", { session: false }, (error, user: User) => {

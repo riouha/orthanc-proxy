@@ -1,9 +1,13 @@
+import { User } from "../../user/entities/user.entity";
 import {
   Entity,
   Column,
   PrimaryGeneratedColumn,
   CreateDateColumn,
   UpdateDateColumn,
+  ManyToOne,
+  ManyToMany,
+  JoinTable,
 } from "typeorm";
 //=============================================
 
@@ -50,6 +54,15 @@ export class Study {
 
   // @OneToMany(()=>Serie)
   // public series: Serie[];
+
+  @ManyToMany(() => User)
+  @JoinTable()
+  subscribers: User[];
+
+  @Column({ nullable: true })
+  userId: number;
+  @ManyToOne(() => User)
+  public user: User;
 
   @CreateDateColumn({ type: "timestamp" })
   createDate: Date;

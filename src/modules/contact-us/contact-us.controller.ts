@@ -2,7 +2,7 @@ import { Request, Response, NextFunction } from "express";
 import { Controller } from "../../lib/decorators/controller.decorator";
 import { Get, Post } from "../../lib/decorators/methods.decorator";
 import { Use } from "../../lib/decorators/middlewae.decorator";
-import { validateInput } from "../../lib/decorators/valdation.decorators";
+import { ValidateInput } from "../../lib/decorators/valdation.decorators";
 import { IResponse } from "../../lib/responses/IResponse";
 import { passportService } from "../user/services/passport.middleware";
 import { SearchSchema, ContactUsSchema } from "./dtos/contact-us.dto";
@@ -10,7 +10,7 @@ import { contactusSevice } from "./services/contact-us.service";
 
 @Controller("/contactus")
 class ContactUsController {
-  @validateInput(ContactUsSchema)
+  @ValidateInput(ContactUsSchema)
   @Post("/")
   async addContactUs(req: Request, res: Response, next: NextFunction) {
     try {
@@ -22,7 +22,7 @@ class ContactUsController {
   }
 
   @Use(passportService.guard("Admin"))
-  @validateInput(SearchSchema, "QUERY")
+  @ValidateInput(SearchSchema, "QUERY")
   @Get("/")
   async searchContactUs(req: Request, res: Response, next: NextFunction) {
     try {
