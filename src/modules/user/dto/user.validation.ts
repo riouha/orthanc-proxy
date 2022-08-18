@@ -7,9 +7,7 @@ export const SignupSchema = Joi.object({
   firstName: Joi.string(),
   lastName: Joi.string(),
   country: Joi.string(),
-  professionalGroups: Joi.array().items(
-    Joi.string().valid(...ProfessionalGroupItems)
-  ),
+  professionalGroups: Joi.array().items(Joi.string().valid(...ProfessionalGroupItems)),
 });
 
 export const LoginSchema = Joi.object({
@@ -22,11 +20,22 @@ export const VerifySchema = Joi.object({
   hash: Joi.string().required(),
 });
 
-export const ForgetPassword = Joi.object({
+export const ForgetPasswordSchema = Joi.object({
   email: Joi.string().min(3).required(),
 });
-export const ChangePassword = Joi.object({
+export const SetNewPasswordSchema = Joi.object({
   email: Joi.string().min(3).required(),
   hash: Joi.string().required(),
   newPassword: Joi.string().min(6).required(),
+});
+
+export const ChangePasswordSchema = Joi.object({
+  oldPassword: Joi.string().required(),
+  newPassword: Joi.string().min(6).required(),
+});
+
+export const SerachUsersSchema = Joi.object({
+  offset: Joi.number().integer().min(0),
+  limit: Joi.number().integer().min(0),
+  email: Joi.string(),
 });

@@ -18,7 +18,7 @@ export class Study {
   public id: number;
 
   @Column({ default: false })
-  public favorite: boolean;
+  public starred: boolean;
 
   @Column({ nullable: true })
   public title?: string;

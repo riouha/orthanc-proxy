@@ -17,12 +17,12 @@ export const SerachStudySchema = Joi.object({
 export class EditStudyDto {
   title?: string;
   description?: string;
-  favorite?: boolean;
+  starred?: boolean;
 }
 export const EditStudySchema = Joi.object({
   title: Joi.string(),
   description: Joi.string(),
-  favorite: Joi.boolean(),
+  starred: Joi.boolean(),
 });
 
 export const DeleteStudiesSchema = Joi.object({

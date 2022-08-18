@@ -36,7 +36,7 @@ class StudyService {
 
     if (dto.title) study.title = dto.title;
     if (dto.description) study.description = dto.description;
-    if (dto.favorite) study.favorite = dto.favorite;
+    if (dto.starred) study.starred = dto.starred;
 
     return this.studyRepo.save(study);
   }
@@ -59,7 +59,7 @@ class StudyService {
   async searchStudy(filters: SearchStudyDto, userId?: number) {
     const query = this.studyRepo
       .createQueryBuilder("study")
-      .orderBy("study.favorite", "ASC")
+      .orderBy("study.starred", "ASC")
       .addOrderBy("study.createDate", "DESC");
 
     if (filters.published) {
