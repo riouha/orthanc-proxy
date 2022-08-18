@@ -99,18 +99,15 @@ class PassportService {
       passport.authenticate("jwt", { session: false }, (err, user) => {
         // use jwt middleware
         if (err) return next(err);
-        if (!user)
-          throw new UnAuthorizedError("invalid token, please login or signup");
+        if (!user) throw new UnAuthorizedError("invalid token, please login or signup");
 
         // verify access
-        if (isActive && !user?.isActive)
-          throw new ForbidenError("access denied.");
+        if (isActive && !user?.isActive) throw new ForbidenError("access denied.");
         const obj: { [key: string]: UserRole[] } = {
           User: ["User"],
           Admin: ["User", "Admin"],
         };
-        if (!obj[user?.role].includes(role))
-          throw new ForbidenError("access denied.");
+        if (!obj[user?.role].includes(role)) throw new ForbidenError("access denied.");
         //
 
         req.user = user;
@@ -122,8 +119,7 @@ class PassportService {
     passport.authenticate("jwt", { session: false }, (err, user) => {
       // use jwt middleware
       if (err) return next(err);
-      if (!user)
-        throw new UnAuthorizedError("invalid token, please login or signup");
+      if (!user) throw new UnAuthorizedError("invalid token, please login or signup");
       req.user = user;
       return next();
     })(req, res, next);
@@ -131,7 +127,7 @@ class PassportService {
 
   generateToken(data: ITokenPayload) {
     return jwt.sign(data, process.env.JWT_SECRET, {
-      expiresIn: "365d",
+      expiresIn: "20d",
       //algorithm: "RS256",
     });
   }

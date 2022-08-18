@@ -8,6 +8,7 @@ import {
   ManyToOne,
   ManyToMany,
   JoinTable,
+  AfterUpdate,
 } from "typeorm";
 //=============================================
 
@@ -15,6 +16,9 @@ import {
 export class Study {
   @PrimaryGeneratedColumn()
   public id: number;
+
+  @Column({ default: false })
+  public favorite: boolean;
 
   @Column({ nullable: true })
   public title?: string;
@@ -46,8 +50,11 @@ export class Study {
   @Column({ nullable: true })
   public modulity?: string;
 
-  @Column({ type: "simple-array" })
+  @Column({ type: "simple-array", nullable: true })
   public orthanc_series: string[];
+
+  @Column({ type: "simple-array", nullable: true })
+  public orthanc_instances: string[];
 
   // @ManyToOne(()=>Patient)
   // public patient: Patient;
