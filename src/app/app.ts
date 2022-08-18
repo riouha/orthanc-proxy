@@ -9,10 +9,7 @@ import "./app.controller";
 import { createProxyMiddleware, fixRequestBody } from "http-proxy-middleware";
 import { passportService } from "../modules/user/services/passport.middleware";
 import { studyMiddleware } from "../modules/study/services/study.mw";
-import {
-  applyProxyRequestRouter,
-  applyProxyResponseRouter,
-} from "./proxy.routes";
+import { applyProxyRequestRouter, applyProxyResponseRouter } from "./proxy.routes";
 
 //===============================================================
 
@@ -36,7 +33,7 @@ export default class Application {
     // # application routes
     this.app.use(
       "/orthanc",
-      passportService.authenticate,
+      // passportService.authenticate,
       createProxyMiddleware({
         // selfHandleResponse: true,
         target: applicationConfigs.orthanc.url,
@@ -46,33 +43,33 @@ export default class Application {
 
         //#region req
         onProxyReq: async (proxyReq, req, res, opt) => {
-          try {
-            console.info(
-              `route ${req.headers.host + req.originalUrl} ==> ${
-                proxyReq.getHeaders().host + req.url
-              }`
-            );
-            await applyProxyRequestRouter(req, res);
-            if (req.body) fixRequestBody(proxyReq, req);
-          } catch (error: any) {
-            errorHandlerMiddleware(console)(error, req, res, undefined);
-          }
+          // try {
+          //   console.info(
+          //     `route ${req.headers.host + req.originalUrl} ==> ${
+          //       proxyReq.getHeaders().host + req.url
+          //     }`
+          //   );
+          //   await applyProxyRequestRouter(req, res);
+          //   if (req.body) fixRequestBody(proxyReq, req);
+          // } catch (error: any) {
+          //   errorHandlerMiddleware(console)(error, req, res, undefined);
+          // }
         },
         //#endregion
 
         onProxyRes: async (proxyRes, req, res) => {
-          try {
-            console.info(
-              `get Response from ${proxyRes.socket.remoteAddress}:${
-                proxyRes.socket.remotePort + req.url
-              } ==> ${req.headers.host + req.originalUrl}`
-            );
-            console.log(proxyRes.statusCode);
-            console.log(res.statusCode);
-            await applyProxyResponseRouter(proxyRes, req, res);
-          } catch (error: any) {
-            errorHandlerMiddleware(console)(error, req, res, undefined);
-          }
+          // try {
+          //   console.info(
+          //     `get Response from ${proxyRes.socket.remoteAddress}:${
+          //       proxyRes.socket.remotePort + req.url
+          //     } ==> ${req.headers.host + req.originalUrl}`
+          //   );
+          //   console.log(proxyRes.statusCode);
+          //   console.log(res.statusCode);
+          //   await applyProxyResponseRouter(proxyRes, req, res);
+          // } catch (error: any) {
+          //   errorHandlerMiddleware(console)(error, req, res, undefined);
+          // }
         },
         // onProxyRes: responseInterceptor(
         //   async (responseBuffer, proxyRes, req, res) => {
@@ -80,8 +77,7 @@ export default class Application {
         //   }
         // ),
         onError: (err: any, req: any, res: any) => {
-          console.log("$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$");
-          console.error("@@@@@@@@@@@@@@@@@");
+          console.error(err);
         },
       })
     );
@@ -100,8 +96,6 @@ export default class Application {
 
     // # application setup
     const port = applicationConfigs.app.port || 4000;
-    this.server = this.app.listen(port, () =>
-      console.log(`listening to port ${port} .............................`)
-    );
+    this.server = this.app.listen(port, () => console.log(`listening to port ${port} .............................`));
   }
 }
